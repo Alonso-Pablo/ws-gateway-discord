@@ -7,7 +7,7 @@ let interval = 0
 token = process.env.USER_TOKEN
 
 payload = {
-  op: 1,
+  op: 2,
   d: {
     token: token,
     intents: 513,
@@ -17,7 +17,6 @@ payload = {
       $device: 'chrome',
     }
   },
-
 }
 
 ws.on('open', function open() {
