@@ -1,9 +1,10 @@
 const WebSocket = require('ws')
-require('dotenv').config();
+require('dotenv').config()
 
 const gateWayVersion = process.env.GATEWAY_VERSION
 const gateWayEncoding = process.env.GATEWAY_ENCODING
-const token = process.env.USER_TOKEN
+const token = process.env.BOT_TOKEN
+const timetoSubmitCredentials = 5000
 
 const ws = new WebSocket(`wss://gateway.discord.gg/?v=${gateWayVersion}&encoding=${gateWayEncoding}`)
 
@@ -39,7 +40,7 @@ ws.on('error', function error(data) {
 
 ws.on('message', function incoming(data) {
   const payload = JSON.parse(data)
-  const { t, event, op, d, s } = payload
+  const { t, op, d, s } = payload
 
   seq = s
 
@@ -50,13 +51,13 @@ ws.on('message', function incoming(data) {
     case 1:
       // Sometimes the server asks the client for a HeartBeating for no reason.
       ws.send(JSON.stringify({ op: 1, d: null }))
+      break
     case 7:
       console.log('SERVER ENVIADO CASO 7. RECONNECT')
       ws.send(JSON.stringify({ op: 6, d: { token, session_id, seq } }))
       break
     case 9:
       // If we can't reconnect, the server will ask us to identify ourselves after 5 seconds.
-      const timetoSubmitCredentials = 5000
       reIdentify(timetoSubmitCredentials)
       break
     case 10:
