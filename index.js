@@ -7,7 +7,6 @@ const token = process.env.USER_TOKEN
 
 const ws = new WebSocket(`wss://gateway.discord.gg/?v=${gateWayVersion}&encoding=${gateWayEncoding}`)
 
-
 const credentials = {
   op: 2,
   d: {
@@ -30,9 +29,7 @@ ws.on('open', function open() {
 })
 
 ws.on('close', function close(data) {
-  // Close event code.
-  // More info: https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes
-  console.log(data)
+  console.log(data) // Log the gateway close event code.
 })
 
 ws.on('error', function error(data) {
@@ -60,12 +57,11 @@ ws.on('message', function incoming(data) {
     case 9:
       // If we can't reconnect, the server will ask us to identify ourselves after 5 seconds.
       const timetoSubmitCredentials = 5000
-      setTimeout(() => {
-        ws.send(JSON.stringify(credentials))
-      }, timetoSubmitCredentials)
+      reIdentify(timetoSubmitCredentials)
+      break
     case 10:
-      const { heartbeat_interval } = d
-      interval = heartbeat(heartbeat_interval)
+      const heartbeatInterval = d.heartbeat_interval
+      interval = heartbeat(heartbeatInterval)
       // The server needs to be constantly sent a 'HeartBeating' before a certain time (heartbeat_interval) or it closes the connection.
       break
     case 11:
@@ -73,21 +69,18 @@ ws.on('message', function incoming(data) {
       console.log('Manteniendo la conexion')
       break
     default:
-      console.log('OP DEFAULT')
+      console.log(`OP: ${op} DEFAULT`)
       console.log(op, t)
       break
-
   }
 
   switch (t) {
     case 'READY':
       session_id = d.session_id
-      console.log(`SESSION ID: ${d.session_id}`)
+      console.log(`SESSION ID: ${session_id}`)
       console.log(`SEQ: ${s}`)
       console.log('\n')
       break
-    case 'GUILD_CREATE':
-    break
     case 'MESSAGE_CREATE':
       console.log(`SEQ: ${s}`)
       console.log(`NEW MESSAGE (Server: ${d.guild_id} Channel: ${d.channel_id})`)
@@ -98,6 +91,12 @@ ws.on('message', function incoming(data) {
       break
   }
 })
+
+const reIdentify = (ms) => {
+  return setTimeout(() => {
+    ws.send(JSON.stringify(credentials))
+  }, ms)
+}
 
 const heartbeat = (ms) => {
   return setInterval(() => {
