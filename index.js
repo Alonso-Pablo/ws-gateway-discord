@@ -1,9 +1,12 @@
 const WebSocket = require('ws')
 require('dotenv').config();
 
-const ws = new WebSocket('wss://gateway.discord.gg/?v=9&encoding=json')
-
+const gateWayVersion = process.env.GATEWAY_VERSION
+const gateWayEncoding = process.env.GATEWAY_ENCODING
 const token = process.env.USER_TOKEN
+
+const ws = new WebSocket(`wss://gateway.discord.gg/?v=${gateWayVersion}&encoding=${gateWayEncoding}`)
+
 
 const credentials = {
   op: 2,
